@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 	"strings"
-	"time"
+	//"time"
 )
 
 func HandleClient(connection net.Conn) {
@@ -42,33 +42,33 @@ func HandleClient(connection net.Conn) {
 		writer.Flush()
 		return
 	}
+	/*
+		// Create a Client struct and add it to the clients map
+		currentClient := Client{Name: clientName, Socket: connection, Data: make(chan string)}
+		clients[connection] = currentClient
 
-	// Create a Client struct and add it to the clients map
-	currentClient := Client{Name: clientName, Socket: connection, Data: make(chan string)}
-	clients[connection] = currentClient
+		// Announce the new client to others
+		msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "]: " + currentClient.Name + " has joined our chat...\n"
+		messages <- msg
 
-	// Announce the new client to others
-	msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "]: " + currentClient.Name + " has joined our chat...\n"
-	messages <- msg
-
-	// Start a goroutine to keep reading client's messages
-	go func() {
-		defer connection.Close()
-		for {
-			buffer := make([]byte, 1024)
-			bytesRead, err := reader.Read(buffer)
-			if err != nil {
-				// Client has disconnected
-				delete(clients, connection)
-				msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "]: " + currentClient.Name + " has left the chat...\n"
-				messages <- msg
-				return
+		// Start a goroutine to keep reading client's messages
+		go func() {
+			defer connection.Close()
+			for {
+				buffer := make([]byte, 1024)
+				bytesRead, err := reader.Read(buffer)
+				if err != nil {
+					// Client has disconnected
+					delete(clients, connection)
+					msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "]: " + currentClient.Name + " has left the chat...\n"
+					messages <- msg
+					return
+				}
+				if bytesRead > 0 {
+					// Sending received message to the channel
+					msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: " + string(buffer[:bytesRead])
+					messages <- msg
+				}
 			}
-			if bytesRead > 0 {
-				// Sending received message to the channel
-				msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: " + string(buffer[:bytesRead])
-				messages <- msg
-			}
-		}
-	}()
+		}()*/
 }

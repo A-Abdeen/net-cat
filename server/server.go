@@ -29,7 +29,8 @@ func main() {
 	}
 	defer listener.Close()
 
-	go penguin.BroadcastMessages()
+	// broadcast messages
+	// go penguin.BroadcastMessages()
 
 	for {
 		connection, err := listener.Accept()

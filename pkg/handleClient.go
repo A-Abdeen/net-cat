@@ -2,16 +2,14 @@ package penguin
 
 import (
 	"bufio"
-	"fmt"
+	// "fmt"
 	"log"
 	"net"
 	"strings"
-	//"time"
+	"time"
 )
 
 func HandleClient(connection net.Conn) {
-	fmt.Println("New client connected:", connection.RemoteAddr().String())
-
 	// Read welcome message from welcome.txt from the message folder
 	welcomeMsg, err := readWelcomeMsg()
 	if err != nil {
@@ -38,37 +36,55 @@ func HandleClient(connection net.Conn) {
 
 	clientName = strings.TrimSpace(clientName)
 	if clientName == "" {
-		writer.WriteString("Name cannot be empty.\n")
+		writer.WriteString("Name cannot be empty. Reconnect\n")
 		writer.Flush()
+		connection.Close()
+		UserCounter--
 		return
 	}
-	/*
-		// Create a Client struct and add it to the clients map
-		currentClient := Client{Name: clientName, Socket: connection, Data: make(chan string)}
-		clients[connection] = currentClient
 
-		// Announce the new client to others
-		msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "]: " + currentClient.Name + " has joined our chat...\n"
-		messages <- msg
+	// Create a Client struct and add it to the clients map
+	currentClient := Client{Name: clientName, Socket: connection}
+	Clients[connection] = currentClient
 
-		// Start a goroutine to keep reading client's messages
-		go func() {
-			defer connection.Close()
-			for {
-				buffer := make([]byte, 1024)
-				bytesRead, err := reader.Read(buffer)
-				if err != nil {
-					// Client has disconnected
-					delete(clients, connection)
-					msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "]: " + currentClient.Name + " has left the chat...\n"
-					messages <- msg
-					return
+	for _, client := range Clients {
+		if currentClient.Socket != client.Socket {
+			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined our chat...\n"))
+			client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
+		}
+	}
+	AllMessages = append(AllMessages, currentClient.Name+" has joined our chat...\n")
+
+	go func() {
+		defer connection.Close()
+
+		contreader := bufio.NewReader(connection)
+		connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
+		for {
+
+			clientMesagge, err := contreader.ReadString('\n')
+			if err != nil {
+				if err.Error() == "EOF" {
+					for _, client := range Clients {
+						if currentClient.Socket != client.Socket {
+							client.Socket.Write([]byte("\n" + currentClient.Name + " has left our chat...\n"))
+							client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
+						}
+					}
+					AllMessages = append(AllMessages, currentClient.Name+" has left our chat...\n")
+					connection.Close()
+					UserCounter--
 				}
-				if bytesRead > 0 {
-					// Sending received message to the channel
-					msg := "[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: " + string(buffer[:bytesRead])
-					messages <- msg
-				}
+				return
 			}
-		}()*/
+			// fmt.Print("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: " + clientMesagge) // XXX
+
+			// append to all messages slice
+			AllMessages = append(AllMessages, "["+time.Now().Format("2006-01-02 15:04:05")+"]["+currentClient.Name+"]: "+clientMesagge)
+
+			currentClient.Message = clientMesagge
+			messages <- currentClient
+
+		}
+	}()
 }

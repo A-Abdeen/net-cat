@@ -1,14 +1,20 @@
 package penguin
 
-import "net"
+import (
+	"net"
+)
 
 type Client struct {
-	Name   string
-	Socket net.Conn
-	Data   chan string
+	Name    string
+	Socket  net.Conn
+	Message string
 }
 
 var (
-	clients  = make(map[net.Conn]Client)
-	messages = make(chan string)
+	Clients     = make(map[net.Conn]Client)
+	messages    = make(chan Client)
+	AllMessages []string
+	// User limit and counter
+	MaxUsers    = 10
+	UserCounter = 1
 )

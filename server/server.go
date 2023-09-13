@@ -26,7 +26,7 @@ func main() {
 	shutdownSignal := make(chan os.Signal, 1)
 	signal.Notify(shutdownSignal, syscall.SIGINT, syscall.SIGTERM)
 
-	fmt.Printf("Listening on the port :%s", port)
+	fmt.Printf("Listening on the IP: %s and port :%s", penguin.GetLOcalIp(), port)
 
 	// Listen for the shutdown signal
 	go func() {

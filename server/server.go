@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	// check if correct number of arguments is used
 	if len(os.Args) != 2 && len(os.Args) != 1 {
 		fmt.Println("[USAGE]: ./TCPChat $port")
 		return
@@ -22,7 +23,7 @@ func main() {
 		port = os.Args[1]
 	}
 
-	// Create a channel to handle the shutdown signal
+	// A channel to handle the shutdown signal
 	shutdownSignal := make(chan os.Signal, 1)
 	signal.Notify(shutdownSignal, syscall.SIGINT, syscall.SIGTERM)
 

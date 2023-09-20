@@ -56,9 +56,10 @@ func main() {
 	go penguin.BroadcastMessages()
 
 	for {
+		conn, err := listener.Accept()
 		if penguin.UserCounter > penguin.MaxUsers {
 			// Server is full, reject the connection
-			conn, err := listener.Accept()
+			
 			if err != nil {
 				log.Printf("Error accepting connection: %s", err.Error())
 			} else {
@@ -67,11 +68,10 @@ func main() {
 			}
 		} else {
 			// Accept new connections until the user limit is reached
-			connection, err := listener.Accept()
 			if err != nil {
 				log.Printf("Error accepting connection: %s", err.Error())
 			} else {
-				go penguin.HandleClient(connection)
+				go penguin.HandleClient(conn)
 				penguin.UserCounter++
 			}
 		}

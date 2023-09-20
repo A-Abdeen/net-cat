@@ -2,6 +2,7 @@ package penguin
 
 import (
 	"bufio"
+	"fmt"
 	// "fmt"
 	"log"
 	"net"
@@ -47,6 +48,14 @@ func HandleClient(connection net.Conn) {
 		UserCounter--
 		return
 	}
+	for i:=0;i<1;i++{
+		for _, client := range Clients{
+		if clientName == client.Name {
+			clientName = clientName + "2"
+			i = -1
+		}
+	}
+}
 
 	// will show chat history for users that join later
 	if len(AllMessages) != 0 {
@@ -91,6 +100,7 @@ func HandleClient(connection net.Conn) {
 				AllMessages = append(AllMessages, currentClient.Name+" has left our chat...\n")
 				connection.Close()
 				UserCounter--
+				fmt.Println(UserCounter)
 				return
 			}
 

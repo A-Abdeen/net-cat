@@ -3,7 +3,6 @@ package penguin
 import (
 	"bufio"
 	"fmt"
-	// "fmt"
 	"log"
 	"net"
 	"strings"
@@ -76,6 +75,7 @@ func HandleClient(connection net.Conn) {
 	for _, client := range Clients {
 		if currentClient.Socket != client.Socket {
 			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined our chat...\n"))
+			// client.Socket.W
 			client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
 		}
 	}
@@ -88,7 +88,6 @@ func HandleClient(connection net.Conn) {
 		contreader := bufio.NewReader(connection) // variable of type reader(has capability to read)
 		connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
 		for {
-
 			clientMessage, err := contreader.ReadString('\n') // reads everything until first occurence of new line
 			if err != nil {                                   // anytime an error happens, assume user has disconnected. errors could be EOF which means they did a signal interrupt
 				for _, client := range Clients { // broadcast message to all users that current client disconnected
@@ -103,7 +102,29 @@ func HandleClient(connection net.Conn) {
 				fmt.Println(UserCounter)
 				return
 			}
-
+			if len(clientMessage) > 5 && clientMessage[0:6] == "-name=" { // flag for name changing
+				previousName := currentClient.Name
+				newName := clientMessage[6:]
+				newName = strings.ReplaceAll(newName, "\n", "")
+				currentClient = Client{Name: newName, Socket: connection}
+				Clients[connection] = currentClient
+				for _, client := range Clients { // broadcast message to all users that current client disconnected
+					if currentClient.Socket != client.Socket { // send to all clients that someone changed his name except that person
+						client.Socket.Write([]byte("\n" + previousName + " has changed his name to " + currentClient.Name + "\n"))
+						client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
+					} else {
+						client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
+					}
+				}
+				AllMessages = append(AllMessages, previousName + " has changed his name to " + currentClient.Name + "\n")
+			} else if len(clientMessage) > 5 && clientMessage[0:6] == "-users" { // flag for number of users
+				var arrayForUser []byte
+				arrayForUser = append(arrayForUser, byte(UserCounter+47))
+				connection.Write([]byte("number of users in group chat is "))
+				connection.Write([]byte(arrayForUser))
+				connection.Write([]byte("\n"))
+				connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
+			} else {
 			// will check if client tries sending an empty message, if so it won't broadcast it
 			clientMessage = strings.TrimSpace(clientMessage)
 			if clientMessage == "" {
@@ -114,11 +135,12 @@ func HandleClient(connection net.Conn) {
 
 			// append to all messages slice, which stores all messages
 			AllMessages = append(AllMessages, "["+time.Now().Format("2006-01-02 15:04:05")+"]["+currentClient.Name+"]: "+clientMessage+"\n")
+		
 
 			// where messages are sent to be printed
 			currentClient.Message = clientMessage
 			messages <- currentClient // channel to communicate with broadcast message go routine, sends data of type client, along with his socket, message and name
-
+}
 		}
 	}()
 }

@@ -47,14 +47,14 @@ func HandleClient(connection net.Conn) {
 		UserCounter--
 		return
 	}
-	for i:=0;i<1;i++{
-		for _, client := range Clients{
-		if clientName == client.Name {
-			clientName = clientName + "2"
-			i = -1
+	for i := 0; i < 1; i++ {
+		for _, client := range Clients {
+			if clientName == client.Name {
+				clientName = clientName + "2"
+				i = -1
+			}
 		}
 	}
-}
 
 	// will show chat history for users that join later
 	if len(AllMessages) != 0 {
@@ -102,45 +102,24 @@ func HandleClient(connection net.Conn) {
 				fmt.Println(UserCounter)
 				return
 			}
-			if len(clientMessage) > 5 && clientMessage[0:6] == "-name=" { // flag for name changing
-				previousName := currentClient.Name
-				newName := clientMessage[6:]
-				newName = strings.ReplaceAll(newName, "\n", "")
-				currentClient = Client{Name: newName, Socket: connection}
-				Clients[connection] = currentClient
-				for _, client := range Clients { // broadcast message to all users that current client disconnected
-					if currentClient.Socket != client.Socket { // send to all clients that someone changed his name except that person
-						client.Socket.Write([]byte("\n" + previousName + " has changed his name to " + currentClient.Name + "\n"))
-						client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
-					} else {
-						client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
-					}
-				}
-				AllMessages = append(AllMessages, previousName + " has changed his name to " + currentClient.Name + "\n")
-			} else if len(clientMessage) > 5 && clientMessage[0:6] == "-users" { // flag for number of users
-				var arrayForUser []byte
-				arrayForUser = append(arrayForUser, byte(UserCounter+47))
-				connection.Write([]byte("number of users in group chat is "))
-				connection.Write([]byte(arrayForUser))
-				connection.Write([]byte("\n"))
-				connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
+			if len(clientMessage) > 1 && clientMessage[0:2] == "--" { // check for flag
+				Flags(clientMessage, connection, currentClient)
 			} else {
-			// will check if client tries sending an empty message, if so it won't broadcast it
-			clientMessage = strings.TrimSpace(clientMessage)
-			if clientMessage == "" {
-				connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
-				continue
+				// will check if client tries sending an empty message, if so it won't broadcast it
+				clientMessage = strings.TrimSpace(clientMessage)
+				if clientMessage == "" {
+					connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
+					continue
+				}
+				// fmt.Print("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: " + clientMessage) // XXX
+
+				// append to all messages slice, which stores all messages
+				AllMessages = append(AllMessages, "["+time.Now().Format("2006-01-02 15:04:05")+"]["+currentClient.Name+"]: "+clientMessage+"\n")
+
+				// where messages are sent to be printed
+				currentClient.Message = clientMessage
+				messages <- currentClient // channel to communicate with broadcast message go routine, sends data of type client, along with his socket, message and name
 			}
-			// fmt.Print("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: " + clientMessage) // XXX
-
-			// append to all messages slice, which stores all messages
-			AllMessages = append(AllMessages, "["+time.Now().Format("2006-01-02 15:04:05")+"]["+currentClient.Name+"]: "+clientMessage+"\n")
-		
-
-			// where messages are sent to be printed
-			currentClient.Message = clientMessage
-			messages <- currentClient // channel to communicate with broadcast message go routine, sends data of type client, along with his socket, message and name
-}
 		}
 	}()
 }

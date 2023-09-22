@@ -8,6 +8,7 @@ type Client struct {
 	Name    string
 	Socket  net.Conn
 	Message string
+	Group   string
 }
 
 var (

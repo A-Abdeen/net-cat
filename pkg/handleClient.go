@@ -37,7 +37,6 @@ func HandleClient(connection net.Conn) {
 		UserCounter--
 		return
 	}
-
 	// trim spaces from client's name
 	clientName = strings.TrimSpace(clientName)
 	if clientName == "" {
@@ -55,8 +54,25 @@ func HandleClient(connection net.Conn) {
 			}
 		}
 	}
-
-	// will show chat history for users that join later
+	// reader := bufio.NewReader(connection)
+	writer.WriteString("Choose Group(1-adnan, 2-abdeen or 3-alali):") 
+	ChoosenGroup, err := reader.ReadString('\n')
+	if err != nil {
+		connection.Close()
+		UserCounter--
+		return
+	}
+	if ChoosenGroup == "1" || ChoosenGroup == "adnan" {
+		ChoosenGroup = "adnan"
+	}else if ChoosenGroup == "2" || ChoosenGroup == "abdeen" {
+		ChoosenGroup = "abdeen"
+	}else if ChoosenGroup == "3" || ChoosenGroup == "alali" {
+		ChoosenGroup = "alali"
+	} else {
+		writer.WriteString("Default group adnan choosen")
+		ChoosenGroup = "adnan" 
+	}
+		// will show chat history for users that join later
 	if len(AllMessages) != 0 {
 		connection.Write([]byte("\n----------------------history----------------------\n"))
 	}
@@ -66,14 +82,15 @@ func HandleClient(connection net.Conn) {
 	if len(AllMessages) != 0 {
 		connection.Write([]byte("----------------------history----------------------\n"))
 	}
-
+fmt.Println(ChoosenGroup)
 	// Create a Client struct and add it to the clients map
-	currentClient := Client{Name: clientName, Socket: connection}
+
+	currentClient := Client{Name: clientName, Socket: connection, Group: ChoosenGroup}
 	Clients[connection] = currentClient
 
 	// announce to all clients, the name of who joined our chat
 	for _, client := range Clients {
-		if currentClient.Socket != client.Socket {
+		if currentClient.Socket != client.Socket && currentClient.Group == client.Group{
 			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined our chat...\n"))
 			// client.Socket.W
 			client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))

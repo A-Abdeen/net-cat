@@ -9,6 +9,7 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client){
 	previousName := currentClient.Name
 	newName := clientMessage[7:]
 	newName = strings.ReplaceAll(newName, "\n", "")
+	newName = strings.TrimSpace(newName)
 	currentClient = Client{Name: newName, Socket: connection}
 	Clients[connection] = currentClient
 	for _, client := range Clients { // broadcast message to all users that current client disconnected
@@ -23,17 +24,10 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client){
 } else if len(clientMessage) > 6 && clientMessage[0:7] == "--users" { // flag for number of users
 	var arrayForUser []byte
 	arrayForUser = append(arrayForUser, byte(UserCounter+47))
-	connection.Write([]byte("number of users in group chat is "))
-	connection.Write([]byte(arrayForUser))
-	connection.Write([]byte("\n"))
+	connection.Write([]byte("number of users in group chat is " + string(arrayForUser) + "\n"))
 	connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
 } else { // if wrong flag used or only '--' present show all available flags
-	connection.Write([]byte("available flags are:"))
-	connection.Write([]byte("\n"))
-	connection.Write([]byte("'--users': shows number of users in group"))
-	connection.Write([]byte("\n"))
-	connection.Write([]byte("'--name=': to change your name"))
-	connection.Write([]byte("\n"))
+	connection.Write([]byte("available flags are:\n" + "'--users': shows number of users in group\n"+"'--name=': to change your name\n"))
 	connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
 }
 }

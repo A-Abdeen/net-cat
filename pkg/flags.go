@@ -27,7 +27,7 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client){
 	connection.Write([]byte(arrayForUser))
 	connection.Write([]byte("\n"))
 	connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
-} else {
+} else { // if wrong flag used or only '--' present show all available flags
 	connection.Write([]byte("available flags are:"))
 	connection.Write([]byte("\n"))
 	connection.Write([]byte("'--users': shows number of users in group"))

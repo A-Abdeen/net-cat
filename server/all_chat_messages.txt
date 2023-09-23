@@ -1,4 +1,18 @@
-ahmed has joined our chat...
+aaa has joined abdeen group chat...
+
+bbb has joined abdeen group chat...
+
+ccc has joined adnan group chat...
+
+ddd has joined alali group chat...
+
+[2023-09-23 22:19:26][aaa]: jjj
+
+[2023-09-23 22:19:29][ccc]: lll
+
+[2023-09-23 22:19:31][ddd]: bbbb
+
+bbb has left abdeen group chat...
 
 Server is closed
 

@@ -58,7 +58,7 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client){
 	}
 	 } else { // if wrong flag used or only '--' present show all available flags
 	connection.Write([]byte("available flags are:\n" + "'--users': shows number of users in group\n"+"'--name': to change your name\n"))
-	connection.Write([]byte("--switch': to switch to another group chat \navailable groupchats are\nadnan\nabdeen\nalali\n"))
+	connection.Write([]byte("'--switch': to switch to another group chat \navailable groupchats are\nadnan\nabdeen\nalali\n"))
 	connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
 }
 }

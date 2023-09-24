@@ -1,20 +1,8 @@
-qqq has joined adnan group chat...
+lll has joined adnan group chat...
 
-www has joined abdeen group chat...
+pp has joined adnan group chat...
 
-qqq2 has joined adnan group chat...
-
-[2023-09-24 11:27:46][qqq2]: ddd
-
-
-qqq2 has switched from group chat adnan to abdeen
-
-[2023-09-24 11:27:55][qqq2]: eded
-
-
-qqq2 has switched from group chat abdeen to adnan
-
-[2023-09-24 11:28:06][qqq2]: 3333
+[2023-09-24 11:32:28][pp]: lolo
 
 Server is closed
 

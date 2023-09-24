@@ -2,7 +2,7 @@ package penguin
 
 import (
 	"bufio"
-	"fmt"
+	// "fmt"
 	"log"
 	"net"
 	"strings"
@@ -49,16 +49,14 @@ func HandleClient(connection net.Conn) {
 	for i := 0; i < 1; i++ {
 		for _, client := range Clients {
 			if clientName == client.Name {
-				clientName = clientName + "2"
+				clientName = clientName + "0"
 				i = -1
 			}
 		}
 	}
-	// reader2 := bufio.NewReader(connection)
-	connection.Write([]byte("Choose Group(1-adnan, 2-abdeen or 3-alali):"))
+	connection.Write([]byte("Choose Group(1, 2 or 3):"))
 	choosen, err := reader.ReadString('\n')
 	choosen = strings.ReplaceAll(choosen, "\n", "")
-	fmt.Print(choosen)
 	if err != nil {
 		connection.Close()
 		UserCounter--
@@ -66,15 +64,15 @@ func HandleClient(connection net.Conn) {
 	}
 	var choosengroup string
 	switch {
-	case choosen == "1" || choosen == "adnan":
-		choosengroup = "adnan"
-	case choosen == "2" || choosen == "abdeen":
-		choosengroup = "abdeen"
-	case choosen == "3" || choosen == "alali":
-		choosengroup = "alali"
+	case choosen == "1":
+		choosengroup = "1"
+	case choosen == "2":
+		choosengroup = "2"
+	case choosen == "3":
+		choosengroup = "3"
 default:
-	choosengroup = "adnan" 
-	connection.Write([]byte("default group chat adnan choosen\n"))
+	choosengroup = "1" 
+	connection.Write([]byte("default group chat 1 choosen\n"))
 	}
 		// will show chat history for users that join later
 	if len(AllMessages) != 0 {
@@ -86,7 +84,6 @@ default:
 	if len(AllMessages) != 0 {
 		connection.Write([]byte("----------------------history----------------------\n"))
 	}
-fmt.Println(choosengroup)
 	// Create a Client struct and add it to the clients map
 
 	currentClient := Client{Name: clientName, Socket: connection, Group: choosengroup}
@@ -95,32 +92,30 @@ fmt.Println(choosengroup)
 	// announce to all clients, the name of who joined our chat
 	for _, client := range Clients {
 		if currentClient.Socket != client.Socket && currentClient.Group == client.Group{
-			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined "+ currentClient.Group+" group chat...\n"))
-			// client.Socket.W
-			client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
+			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined "+ "group chat " +currentClient.Group + "\n"))
+			client.Socket.Write([]byte("[Group " + client.Group+ "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 		}
 	}
-	AllMessages = append(AllMessages,currentClient.Name + " has joined "+ currentClient.Group+" group chat...\n")
+	AllMessages = append(AllMessages,currentClient.Name + " has joined "+ "group chat " +currentClient.Group + "\n")
 
 	// go routine that will keep reading each clients input
 	go func() {
 		defer connection.Close() // after programming is done running, it will make sure to close connection
 
 		contreader := bufio.NewReader(connection) // variable of type reader(has capability to read)
-		connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
+		connection.Write([]byte("[Group " + currentClient.Group+ "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 		for {
 			clientMessage, err := contreader.ReadString('\n') // reads everything until first occurence of new line
 			if err != nil {                                   // anytime an error happens, assume user has disconnected. errors could be EOF which means they did a signal interrupt
 				for _, client := range Clients { // broadcast message to all users that current client disconnected
-					if currentClient.Socket != client.Socket && currentClient.Group == client.Group { // send to all clients that someone left, except that person
-						client.Socket.Write([]byte("\n" + currentClient.Name + " has left our chat...\n"))
-						client.Socket.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + client.Name + "]: "))
+					if currentClient.Socket != client.Socket { // send to all clients that someone left, except that person
+						client.Socket.Write([]byte("\n" + currentClient.Name + " has left group chat " + currentClient.Group + "\n"))
+						client.Socket.Write([]byte("[Group " + client.Group+ "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 					}
 				}
-				AllMessages = append(AllMessages, currentClient.Name + " has left "+ currentClient.Group+" group chat...\n")
+				AllMessages = append(AllMessages, currentClient.Name + " has left group chat " +currentClient.Group + "\n")
 				connection.Close()
 				UserCounter--
-				fmt.Println(UserCounter)
 				return
 			}
 			if len(clientMessage) > 1 && clientMessage[0:2] == "--" { // check for flag
@@ -130,13 +125,12 @@ fmt.Println(choosengroup)
 				// will check if client tries sending an empty message, if so it won't broadcast it
 				clientMessage = strings.TrimSpace(clientMessage)
 				if clientMessage == "" {
-					connection.Write([]byte("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: "))
+					connection.Write([]byte("[Group " + currentClient.Group+ "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 					continue
 				}
-				// fmt.Print("[" + time.Now().Format("2006-01-02 15:04:05") + "][" + currentClient.Name + "]: " + clientMessage) // XXX
 
 				// append to all messages slice, which stores all messages
-				AllMessages = append(AllMessages, "["+time.Now().Format("2006-01-02 15:04:05")+"]["+currentClient.Name+"]: "+clientMessage+"\n")
+				AllMessages = append(AllMessages, "[Group " + currentClient.Group+ "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:" + clientMessage + "\n")
 
 				// where messages are sent to be printed
 				currentClient.Message = clientMessage

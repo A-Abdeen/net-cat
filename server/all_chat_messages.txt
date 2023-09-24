@@ -1,8 +1,15 @@
-lll has joined adnan group chat...
+aaaa has joined group chat 1
 
-pp has joined adnan group chat...
+bbbb has joined group chat 1
 
-[2023-09-24 11:32:28][pp]: lolo
+[Group 1][14:01:46][bbbb]:asdasd
+
+
+bbbb has switched from group chat 1 to 2
+
+bbbb has left group chat 2
+
+aaaa has left group chat 1
 
 Server is closed
 

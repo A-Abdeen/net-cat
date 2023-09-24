@@ -36,7 +36,7 @@ That's it! You're now ready to run the TCP Chat Server and connect as a client t
 
 -Note: flags available: '--name': allows you to change your name in the group chat.(ex: --name Ahmed)
                         '--users': shows you the number of users connected.
-                        '--switch': allows you to switch from one group chat to another.(ex: --switch adnan)
+                        '--switch': allows you to switch from one group chat to another.(ex: --switch 2)
 
 **Authors**
 

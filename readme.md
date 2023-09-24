@@ -30,9 +30,13 @@ nc <SERVER_IP> <PORT>
 
 - Replace <SERVER_IP> with the actual IP address of the server and <PORT> with the port number it's listening on. Once connected, you can start chatting with other clients in the group chat.
 
-Note: When prompted, provide a username, and you can start sending and receiving messages.
+- When prompted provide a username and choose the group chat you want to join.
 
 That's it! You're now ready to run the TCP Chat Server and connect as a client to join the chat.
+
+-Note: flags available: '--name': allows you to change your name in the group chat.(ex: --name Ahmed)
+                        '--users': shows you the number of users connected.
+                        '--switch': allows you to switch from one group chat to another.(ex: --switch adnan)
 
 **Authors**
 

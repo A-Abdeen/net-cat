@@ -74,7 +74,7 @@ func HandleClient(connection net.Conn) {
 		choosengroup = "alali"
 default:
 	choosengroup = "adnan" 
-	connection.Write([]byte("default group chat adnan choosen"))
+	connection.Write([]byte("default group chat adnan choosen\n"))
 	}
 		// will show chat history for users that join later
 	if len(AllMessages) != 0 {
@@ -125,6 +125,7 @@ fmt.Println(choosengroup)
 			}
 			if len(clientMessage) > 1 && clientMessage[0:2] == "--" { // check for flag
 				Flags(clientMessage, connection, currentClient)
+				currentClient = Clients[connection]
 			} else {
 				// will check if client tries sending an empty message, if so it won't broadcast it
 				clientMessage = strings.TrimSpace(clientMessage)

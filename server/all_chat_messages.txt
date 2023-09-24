@@ -1,6 +1,19 @@
-ahmed has joined our chat...
+aaaa has joined group chat 1
 
+<<<<<<< HEAD
 ahmed has changed his name to 
+=======
+bbbb has joined group chat 1
+
+[Group 1][14:01:46][bbbb]:asdasd
+
+
+bbbb has switched from group chat 1 to 2
+
+bbbb has left group chat 2
+
+aaaa has left group chat 1
+>>>>>>> multiple-groups
 
 Server is closed
 

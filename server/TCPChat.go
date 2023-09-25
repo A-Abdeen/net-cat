@@ -37,7 +37,7 @@ func main() {
 		for _, client := range penguin.Clients {
 			client.Socket.Write([]byte("\nServer is closed"))
 		}
-		penguin.AllMessages = append(penguin.AllMessages, "Server is closed\n")
+		penguin.AllMessages["server"] = append(penguin.AllMessages["server"], "Server is closed\n")
 		// For example, close network connections, save data, etc.
 		// Save all messages to a file before exiting
 		penguin.SaveAllMessagesToFile("all_chat_messages.txt")
@@ -59,7 +59,7 @@ func main() {
 		conn, err := listener.Accept()
 		if penguin.UserCounter > penguin.MaxUsers {
 			// Server is full, reject the connection
-			
+
 			if err != nil {
 				log.Printf("Error accepting connection: %s", err.Error())
 			} else {

@@ -1,19 +1,33 @@
-aaaa has joined group chat 1
+private
+jaberi has joined this group chat 
 
-<<<<<<< HEAD
-ahmed has changed his name to 
-=======
-bbbb has joined group chat 1
-
-[Group 1][14:01:46][bbbb]:asdasd
+[Group private][14:27:30][jaberi]:switch 1
 
 
-bbbb has switched from group chat 1 to 2
+jaberi has left this chat 
 
-bbbb has left group chat 2
 
-aaaa has left group chat 1
->>>>>>> multiple-groups
+jaberi has joined chat 
 
+
+jaberi has left this chat 
+
+1
+
+jaberi has joined chat 
+
+
+jaberi has left this chat 
+
+
+jaberi has joined chat 
+
+jaberi has left group chat 1
+
+jaberi has joined this group chat 
+
+jaberi has left group chat 1
+
+server
 Server is closed
 

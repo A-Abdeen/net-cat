@@ -2,6 +2,7 @@ package penguin
 
 import (
 	"net"
+	"sync"
 )
 
 type Client struct {
@@ -12,10 +13,12 @@ type Client struct {
 }
 
 var (
-	Clients     = make(map[net.Conn]Client)
-	messages    = make(chan Client)
-	AllMessages []string
+	ClientsMutex sync.Mutex
+	Clients      = make(map[net.Conn]Client)
+	messages     = make(chan Client)
+	AllMessages  = make(map[string][]string)
 	// User limit and counter
 	MaxUsers    = 10
 	UserCounter = 1
+	Secret      = "8008"
 )

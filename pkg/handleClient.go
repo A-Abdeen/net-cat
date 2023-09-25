@@ -54,7 +54,7 @@ func HandleClient(connection net.Conn) {
 			}
 		}
 	}
-	connection.Write([]byte("Choose Group(1, 2 or 3):"))
+	connection.Write([]byte("Choose Group(1, 2 or private):"))
 	choosen, err := reader.ReadString('\n')
 	choosen = strings.ReplaceAll(choosen, "\n", "")
 	if err != nil {
@@ -68,54 +68,89 @@ func HandleClient(connection net.Conn) {
 		choosengroup = "1"
 	case choosen == "2":
 		choosengroup = "2"
-	case choosen == "3":
-		choosengroup = "3"
-default:
-	choosengroup = "1" 
-	connection.Write([]byte("default group chat 1 choosen\n"))
+	case choosen == "private":
+		choosengroup = "private"
+		connection.Write([]byte("This is a private chamber, type the secret password: "))
+
+		for {
+			password, err := reader.ReadString('\n')
+
+			password = strings.ReplaceAll(password, "\n", "")
+			password = strings.ReplaceAll(password, " ", "")
+			if err != nil {
+				connection.Close()
+				UserCounter--
+				return
+			}
+			if password == Secret {
+				break
+			}
+			if password == "--quit" {
+				connection.Close()
+				UserCounter--
+				return
+			}
+			connection.Write([]byte("Password is wrong. try again noob or do --quit: "))
+		}
+	default:
+		choosengroup = "1"
+		connection.Write([]byte("default group chat 1 chosen\n"))
 	}
-		// will show chat history for users that join later
-	if len(AllMessages) != 0 {
+	// will show chat history for users that join later
+	if len(AllMessages[choosengroup]) != 0 {
 		connection.Write([]byte("\n----------------------history----------------------\n"))
 	}
-	for _, pastMessage := range AllMessages {
+	for _, pastMessage := range AllMessages[choosengroup] {
 		connection.Write([]byte(pastMessage))
 	}
-	if len(AllMessages) != 0 {
+	if len(AllMessages[choosengroup]) != 0 {
 		connection.Write([]byte("----------------------history----------------------\n"))
 	}
 	// Create a Client struct and add it to the clients map
 
 	currentClient := Client{Name: clientName, Socket: connection, Group: choosengroup}
+	// lock the variable so no other go routine tries accessing it before it's added
+	ClientsMutex.Lock()
+	// add the client
 	Clients[connection] = currentClient
-
+	// unlock the variable so other go routines can access it after it has been added to the Clients map
+	ClientsMutex.Unlock()
 	// announce to all clients, the name of who joined our chat
 	for _, client := range Clients {
-		if currentClient.Socket != client.Socket && currentClient.Group == client.Group{
-			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined "+ "group chat " +currentClient.Group + "\n"))
-			client.Socket.Write([]byte("[Group " + client.Group+ "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
+		if currentClient.Socket != client.Socket && currentClient.Group == client.Group {
+			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined this group chat: " + currentClient.Group + "\n"))
+			client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 		}
 	}
-	AllMessages = append(AllMessages,currentClient.Name + " has joined "+ "group chat " +currentClient.Group + "\n")
+	AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" has joined this group chat "+"\n")
 
 	// go routine that will keep reading each clients input
 	go func() {
 		defer connection.Close() // after programming is done running, it will make sure to close connection
 
 		contreader := bufio.NewReader(connection) // variable of type reader(has capability to read)
-		connection.Write([]byte("[Group " + currentClient.Group+ "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
+		connection.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 		for {
 			clientMessage, err := contreader.ReadString('\n') // reads everything until first occurence of new line
 			if err != nil {                                   // anytime an error happens, assume user has disconnected. errors could be EOF which means they did a signal interrupt
 				for _, client := range Clients { // broadcast message to all users that current client disconnected
-					if currentClient.Socket != client.Socket { // send to all clients that someone left, except that person
-						client.Socket.Write([]byte("\n" + currentClient.Name + " has left group chat " + currentClient.Group + "\n"))
-						client.Socket.Write([]byte("[Group " + client.Group+ "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
+					if currentClient.Socket != client.Socket && client.Group == currentClient.Group { // send to all clients that someone left, except that person
+						client.Socket.Write([]byte("\n" + currentClient.Name + " has left this group chat " + "\n"))
+						client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 					}
 				}
-				AllMessages = append(AllMessages, currentClient.Name + " has left group chat " +currentClient.Group + "\n")
+				AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" has left group chat "+currentClient.Group+"\n")
 				connection.Close()
 				UserCounter--
+				// Lock the ClientsMutex before accessing the Clients map.
+				ClientsMutex.Lock()
+
+				// Remove the client from the Clients map
+				delete(Clients, currentClient.Socket)
+
+				// unlock the variable so other go routines can access the variable
+				ClientsMutex.Unlock()
+
 				return
 			}
 			if len(clientMessage) > 1 && clientMessage[0:2] == "--" { // check for flag
@@ -125,12 +160,12 @@ default:
 				// will check if client tries sending an empty message, if so it won't broadcast it
 				clientMessage = strings.TrimSpace(clientMessage)
 				if clientMessage == "" {
-					connection.Write([]byte("[Group " + currentClient.Group+ "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
+					connection.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 					continue
 				}
 
 				// append to all messages slice, which stores all messages
-				AllMessages = append(AllMessages, "[Group " + currentClient.Group+ "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:" + clientMessage + "\n")
+				AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], "[Group "+currentClient.Group+"]["+time.Now().Format("15:04:05")+"]["+currentClient.Name+"]:"+clientMessage+"\n")
 
 				// where messages are sent to be printed
 				currentClient.Message = clientMessage

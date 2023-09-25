@@ -14,10 +14,16 @@ func SaveAllMessagesToFile(filename string) {
 	}
 	defer file.Close()
 
-	for _, msg := range AllMessages {
-		_, err := file.WriteString(msg + "\n")
+	for index, chat := range AllMessages {
+		_, err := file.WriteString(index + "\n")
 		if err != nil {
 			log.Printf("Error writing message to chat log file: %s", err.Error())
+		}
+		for _, msg := range chat {
+			_, err := file.WriteString(msg + "\n")
+			if err != nil {
+				log.Printf("Error writing message to chat log file: %s", err.Error())
+			}
 		}
 	}
 }

@@ -14,7 +14,8 @@ func HandleClient(connection net.Conn) {
 	welcomeMsg, err := readWelcomeMsg()
 	if err != nil {
 		log.Printf("Error reading welcome.txt: %s", err.Error())
-
+		connection.Close()
+		UserCounter--
 		return
 	}
 
@@ -54,7 +55,7 @@ func HandleClient(connection net.Conn) {
 			}
 		}
 	}
-	connection.Write([]byte("Choose Group(1, 2 or private):"))
+	connection.Write([]byte("Choose Chat(1, 2 or private):"))
 	choosen, err := reader.ReadString('\n')
 	choosen = strings.ReplaceAll(choosen, "\n", "")
 	if err != nil {
@@ -118,11 +119,11 @@ func HandleClient(connection net.Conn) {
 	// announce to all clients, the name of who joined our chat
 	for _, client := range Clients {
 		if currentClient.Socket != client.Socket && currentClient.Group == client.Group {
-			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined this group chat: " + currentClient.Group + "\n"))
+			client.Socket.Write([]byte("\n" + currentClient.Name + " has joined the chat: " + currentClient.Group + "\n"))
 			client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 		}
 	}
-	AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" has joined this group chat "+"\n")
+	AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" has joined the chat "+"\n")
 
 	// go routine that will keep reading each clients input
 	go func() {
@@ -135,11 +136,11 @@ func HandleClient(connection net.Conn) {
 			if err != nil {                                   // anytime an error happens, assume user has disconnected. errors could be EOF which means they did a signal interrupt
 				for _, client := range Clients { // broadcast message to all users that current client disconnected
 					if currentClient.Socket != client.Socket && client.Group == currentClient.Group { // send to all clients that someone left, except that person
-						client.Socket.Write([]byte("\n" + currentClient.Name + " has left this group chat " + "\n"))
+						client.Socket.Write([]byte("\n" + currentClient.Name + " has left the chat " + "\n"))
 						client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 					}
 				}
-				AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" has left group chat "+currentClient.Group+"\n")
+				AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" has left this chat \n")
 				connection.Close()
 				UserCounter--
 				// Lock the ClientsMutex before accessing the Clients map.

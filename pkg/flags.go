@@ -58,6 +58,18 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 				ClientsMutex.Lock()                 // lock global variable for other go routines
 				Clients[connection] = currentClient // update the Clients map
 				ClientsMutex.Unlock()               // unlock global variable for other go routines
+
+				// will show chat history for users that join later
+				if len(AllMessages[groupToSwitch]) != 0 {
+					connection.Write([]byte("\n----------------------history----------------------\n"))
+				}
+				for _, pastMessage := range AllMessages[groupToSwitch] {
+					connection.Write([]byte(pastMessage))
+				}
+				if len(AllMessages[groupToSwitch]) != 0 {
+					connection.Write([]byte("----------------------history----------------------\n"))
+				}
+
 				for _, client := range Clients {
 					if currentClient.Socket != client.Socket && client.Group == currentClient.Group { // send to all clients that the current user has switched groups
 						client.Socket.Write([]byte("\n" + currentClient.Name + " has joined this chat " + "\n"))
@@ -88,16 +100,6 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 					password = strings.ReplaceAll(password, "\n", "")
 					password = strings.ReplaceAll(password, " ", "")
 					if err != nil {
-						connection.Close()
-						UserCounter--
-						return
-					}
-					if password == Secret {
-						break
-					}
-					if password == "--quit" {
-						connection.Close()
-						UserCounter--
 						// Lock the ClientsMutex before accessing the Clients map.
 						ClientsMutex.Lock()
 
@@ -106,6 +108,16 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 
 						// unlock the variable so other go routines can access the variable
 						ClientsMutex.Unlock()
+						connection.Close()
+						UserCounter--
+						return
+					}
+					if password == Secret {
+						break
+					}
+					if password == "--quit" {
+						connection.Write([]byte("You chose to quit(loser), returning to normal chat\n"))
+						connection.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 						return
 					}
 					connection.Write([]byte("Password is wrong. try again noob or do --quit: "))
@@ -114,6 +126,18 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 				ClientsMutex.Lock()                 // lock global variable for other go routines
 				Clients[connection] = currentClient // update the Clients map
 				ClientsMutex.Unlock()               // unlock global variable for other go routines
+
+				// will show chat history for users that join later
+				if len(AllMessages[groupToSwitch]) != 0 {
+					connection.Write([]byte("\n----------------------history----------------------\n"))
+				}
+				for _, pastMessage := range AllMessages[groupToSwitch] {
+					connection.Write([]byte(pastMessage))
+				}
+				if len(AllMessages[groupToSwitch]) != 0 {
+					connection.Write([]byte("----------------------history----------------------\n"))
+				}
+
 				for _, client := range Clients {
 					if currentClient.Socket != client.Socket && client.Group == currentClient.Group { // send to all clients that the current user has switched groups
 						client.Socket.Write([]byte("\n" + currentClient.Name + " has joined this chat " + "\n"))

@@ -136,11 +136,11 @@ func HandleClient(connection net.Conn) {
 			if err != nil {                                   // anytime an error happens, assume user has disconnected. errors could be EOF which means they did a signal interrupt
 				for _, client := range Clients { // broadcast message to all users that current client disconnected
 					if currentClient.Socket != client.Socket && client.Group == currentClient.Group { // send to all clients that someone left, except that person
-						client.Socket.Write([]byte("\n" + currentClient.Name + " has left the chat " + "\n"))
+						client.Socket.Write([]byte("\n" + currentClient.Name + " is now offline " + "\n"))
 						client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 					}
 				}
-				AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" has left this chat \n")
+				AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], currentClient.Name+" is now offline \n")
 				connection.Close()
 				UserCounter--
 				// Lock the ClientsMutex before accessing the Clients map.

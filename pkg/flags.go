@@ -2,6 +2,7 @@ package penguin
 
 import (
 	"bufio"
+	"fmt"
 	"net"
 	"strings"
 	"time"
@@ -30,8 +31,11 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 				if currentClient.Socket != client.Socket && client.Group == currentClient.Group { // send to all clients in specific chat that the current user changed his name
 					client.Socket.Write([]byte("\n" + previousName + " has changed his name to " + currentClient.Name + "\n"))
 					client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
+				} else if currentClient.Socket == client.Socket {
+					client.Socket.Write([]byte("Your name has successfully changed to " + currentClient.Name + "\n"))
+					client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
 				} else {
-					client.Socket.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
+					continue
 				}
 			}
 			AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], previousName+" has changed his name to "+currentClient.Name)
@@ -41,8 +45,13 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 		}
 	} else if len(clientMessage) > 6 && clientMessage[0:7] == "--users" { // flag to show the number of users
 		var arrayForUser []byte
-		arrayForUser = append(arrayForUser, byte(UserCounter+47))
-		connection.Write([]byte("number of users in all group chats is " + string(arrayForUser) + "\n"))
+		arrayForUser = []byte(fmt.Sprint(UserCounter - 1))
+		var max = []byte(fmt.Sprint(10))
+		if len(arrayForUser) == len(max) {
+			connection.Write([]byte("Total number of users in all groups is " + string(arrayForUser) + " (Server is full).\n"))
+		} else {
+			connection.Write([]byte("Total number of users in all groups is " + string(arrayForUser) + "\n"))
+		}
 		connection.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 	} else if len(clientMessage) > 7 && clientMessage[0:8] == "--switch" { // flag for switching groups
 		groupIn := currentClient.Group
@@ -77,9 +86,11 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 					} else if currentClient.Socket == client.Socket {
 						client.Socket.Write([]byte("You joined Group " + groupToSwitch + "\n"))
 						client.Socket.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
-					} else {
+					} else if currentClient.Socket != client.Socket && client.Group == groupIn {
 						client.Socket.Write([]byte("\n" + currentClient.Name + " has left this chat " + "\n"))
 						client.Socket.Write([]byte("[Group " + client.Group + "][" + time.Now().Format("15:04:05") + "][" + client.Name + "]:"))
+					} else {
+						continue
 					}
 				}
 				AllMessages[currentClient.Group] = append(AllMessages[currentClient.Group], "\n"+currentClient.Name+" has joined chat "+"\n")
@@ -116,7 +127,7 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 						break
 					}
 					if password == "--quit" {
-						connection.Write([]byte("You chose to quit(loser), returning to normal chat\n"))
+						connection.Write([]byte("You chose to quit(loser), returning to current group\n"))
 						connection.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 						return
 					}
@@ -159,7 +170,7 @@ func Flags(clientMessage string, connection net.Conn, currentClient Client) {
 		}
 	} else { // if wrong flag used or only '--' present show all available flags
 		connection.Write([]byte("available flags are:\n" + "'--users': shows number of users in group\n" + "'--name': to change your name\n"))
-		connection.Write([]byte("'--switch': to switch to another group chat \navailable group chats are: 1, 2 or 3\n"))
+		connection.Write([]byte("'--switch': to switch to another group chat \navailable group chats are: 1, 2 or private\n"))
 		connection.Write([]byte("[Group " + currentClient.Group + "][" + time.Now().Format("15:04:05") + "][" + currentClient.Name + "]:"))
 	}
 }

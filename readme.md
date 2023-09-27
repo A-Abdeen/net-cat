@@ -4,9 +4,9 @@ This project is a TCP Chat Server that allows users to participate in a group ch
 
 **Running the Server**
 
-1. Clone or download this repository to your local machine.
-2. Navigate to the project directory and enter the server directory.
-3. Open a terminal or command prompt.
+1. Clone or download this repository to your local machine
+2. Navigate to the project directory and enter the server directory
+3. Open a terminal or command prompt
 
 ### To start the server, run the following command:
 
@@ -28,9 +28,11 @@ To connect to the server as a client, use the nc (NetCat) command followed by th
 nc <SERVER_IP> <PORT>
 ```
 
-- Replace <SERVER_IP> with the actual IP address of the server and <PORT> with the port number it's listening on. Once connected, you can start chatting with other clients in the group chat.
+- Replace <SERVER_IP> with the actual IP address of the server and <PORT> with the port number it's listening on
 
-- When prompted provide a username and choose the group chat you want to join.
+- When prompted, provide a username and choose the group chat you want to join
+
+- Once connected, you can start chatting with other clients in the group chat
 
 That's it! You're now ready to run the TCP Chat Server and connect as a client to join the chat.
 
@@ -41,5 +43,5 @@ That's it! You're now ready to run the TCP Chat Server and connect as a client t
 **Authors**
 
 - Adnan Jaberi
-- Ahmad alali
-- ahmad abdeen
+- Ahmed Alali
+- Ahmed Abdeen
